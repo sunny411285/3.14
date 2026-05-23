@@ -1,6 +1,5 @@
 import streamlit as st
 import yfinance as yf
-import feedparser
 import urllib.parse
 import pandas as pd
 
@@ -62,19 +61,16 @@ with st.spinner("最新データを読み込み中..."):
     except Exception as e:
         st.error("Yahoo Financeの通信エラーが発生しました。リロードするか時間を置いてください。")
 
-    # ニュースの表示
-    st.markdown(f"### 📰 {selected_company} の関連ニュース")
-    
-    # ★修正ポイント：確実なティッカー名（AAPLなど）でニュースを検索する
-    encoded_keyword = urllib.parse.quote(ticker)
-    url = f"https://google.com{encoded_keyword}&hl=ja&gl=JP&ceid=JP:ja"
-    
-    feed = feedparser.parse(url)
-    
-    if feed.entries:
-        # 🟢 見栄えアップ：ニュースも綺麗なカード形式で並べる
-        for entry in feed.entries[:3]:
-            with st.container(border=True):
-                st.markdown(f"**[{entry.title}]({entry.link})**")
-    else:
-        st.info("現在、関連ニュースはありません。")
+    # 🟢 見栄えアップ：エラーが出ない安全なニュースリンクボタンに変更
+    st.markdown(f"### 📰 {selected_company} の最新情報をチェック")
+    with st.container(border=True):
+        st.write("外部サイトで最新の関連ニュースや企業情報を確認できます。")
+        encoded_keyword = urllib.parse.quote(f"{selected_company} ニュース")
+        
+        # GoogleニュースとYahooファイナンスへのリンクボタンを横並びに配置
+        btn_col1, btn_col2, _ = st.columns([1, 1, 2])
+        with btn_col1:
+            st.link_button("🌐 Googleニュースで見る", f"https://google.com{encoded_keyword}&hl=ja&gl=JP&ceid=JP:ja")
+        with btn_col2:
+            st.link_button("📈 Yahoo!ファイナンスで見る", f"https://yahoo.co.jp")
+
