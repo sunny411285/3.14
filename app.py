@@ -25,10 +25,6 @@ companies = {
 selected_company = st.selectbox("調べる企業を選んでください：", list(companies.keys()))
 ticker = companies[selected_company]
 
-# ★修正ポイント：企業名から絵文字やティッカーを除いた「純粋な英語名」を正しく取得
-# 例: "🍎 Apple (AAPL)" -> "Apple"
-pure_company_name = selected_company.split(" ")[1]
-
 with st.spinner("最新データを読み込み中..."):
     try:
         # 為替データの取得
@@ -68,7 +64,9 @@ with st.spinner("最新データを読み込み中..."):
 
     # ニュースの表示
     st.markdown(f"### 📰 {selected_company} の関連ニュース")
-    encoded_keyword = urllib.parse.quote(pure_company_name)
+    
+    # ★修正ポイント：確実なティッカー名（AAPLなど）でニュースを検索する
+    encoded_keyword = urllib.parse.quote(ticker)
     url = f"https://google.com{encoded_keyword}&hl=ja&gl=JP&ceid=JP:ja"
     
     feed = feedparser.parse(url)
