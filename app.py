@@ -7,7 +7,7 @@ import pandas as pd
 st.set_page_config(layout="wide", page_title="米国株トレンドチェッカー PRO")
 
 st.title("🇺🇸 米国株トレンドチェッカー PRO")
-st.write("リアルタイム株価、円建て換算、最新ニュース、そして株価チャートをまとめてチェック！")
+st.write("リアルタイム株価、円建て換算、最新ニュース、そして株価チャートをまとめてチェック！今後種類も増やしていきます。")
 
 # 1. 企業のリスト
 companies = {
