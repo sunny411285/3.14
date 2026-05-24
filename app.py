@@ -86,12 +86,12 @@ else:
 # 1. まず「市場が今リアルタイムに開いているか」を判定する
 is_market_open = False
 
-# 火・水・木・金・土の深夜（0:00〜朝5時/6時まで）は市場が動いている
+# 火・水・木・金・土（1, 2, 3, 4, 5）の深夜（0:00〜朝5時/6時まで）は、米国時間の平日のため動いている
 if weekday in [1, 2, 3, 4, 5]: 
     if hour < end_h:
         is_market_open = True
 
-# 月・火・水・木・金の夜（22:30/23:30以降〜24:00まで）は市場が開いている
+# 月・火・水・木・金（0, 1, 2, 3, 4）の夜（22:30/23:30以降〜24:00まで）は、市場が開いている
 if weekday in [0, 1, 2, 3, 4]:
     if hour > start_h or (hour == start_h and minute >= start_m):
         is_market_open = True
@@ -150,7 +150,7 @@ with st.spinner("最新データを読み込み中..."):
         hist = stock_data.history(period=selected_period)
 
         if hist is not None and not hist.empty:
-            # 空白の行（データ未確定の行など）を完全に除外して、最後の記録を確実に残す
+            # 空白の行を完全に除外して、最後の記録を確実に残す
             hist = hist.dropna(subset=['Close'])
             
             if len(hist) >= 2:
@@ -196,7 +196,7 @@ with st.spinner("最新データを読み込み中..."):
     with st.expander("📘 このツールの使い方・見方のコツ"):
         st.markdown(
             "1. 左側のメニューから**気になる企業**と**期間**を選びます。\n"
-            "2. **前日比（%）**がプラスなら緑色で「▲ Rhine」、マイナスなら赤色で「▼」と表示されます。\n"
+            "2. **前日比（%）**がプラスなら緑色で表示され、マイナスなら赤色で表示されます。\n"
             "3. チャートにマウスを乗せると、その日の詳細な株価がピンポイントで確認できます。"
         )
 
@@ -211,3 +211,4 @@ with st.spinner("最新データを読み込み中..."):
             st.link_button("🌐 Googleニュースで見る", f"https://google.com{encoded_keyword}&hl=ja&gl=JP&ceid=JP:ja", use_container_width=True)
         with btn_col2:
             st.link_button("📈 Yahoo!ファイナンスで見る", f"https://yahoo.co.jp{encoded_keyword}", use_container_width=True)
+r_width=True)
