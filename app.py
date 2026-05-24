@@ -170,5 +170,5 @@ with st.container(border=True):
     with btn_col1:
         st.link_button("🌐 Googleニュースで見る", f"https://google.com{encoded_ticker}&hl=ja&gl=JP&ceid=JP:ja", use_container_width=True)
     with btn_col2:
-        st.link_button("📈 Yahoo!ファイナンスで見る", f"https://finance.yahoo.co.jp{encoded_ticker}", use_container_width=True)
+        st.link_button("📈 Yahoo!ファイナンスで見る", f"https://finance.yahoo.co.jp/stocks/us{encoded_ticker}", use_container_width=True)
 
