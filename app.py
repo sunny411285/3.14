@@ -43,8 +43,8 @@ selected_period = period_labels[selected_period_label]
 st.title("🇺🇸 米国株トレンドチェッカー PRO")
 st.write("リアルタイム株価、円建て換算、最新ニュース、そして株価チャートをまとめてチェック！")
 
-# 🟢 【位置変更】使い方ガイド（一番上に移動）
-with st.expander("📘 このツールの使い方・見方のコツ", expanded=True): # 最初から開いた状態に設定
+# 🟢 使い方ガイド（一番上に配置）
+with st.expander("📘 このツールの使い方・見方のコツ", expanded=True):
     st.markdown(
         "1. 左側のメニューから気になる企業と期間を選びます。\n"
         "2. 前日比（%）がプラスなら緑色、マイナスなら赤色で表示されます。\n"
@@ -99,14 +99,12 @@ with st.spinner("最新データを読み込み中..."):
         hist = stock_data.history(period=selected_period)
 
         if hist is not None and not hist.empty:
-            # データの空白行を完全に除外
             hist = hist.dropna(subset=['Close'])
             
             if len(hist) >= 2:
                 current_price_usd = hist['Close'].iloc[-1]
                 prev_price_usd = hist['Close'].iloc[-2]
                 
-                # 万が一最新値が異常値（0以下）だった場合の安全ガード
                 if current_price_usd <= 0.01 and len(hist) >= 3:
                     current_price_usd = hist['Close'].iloc[-2]
                     prev_price_usd = hist['Close'].iloc[-3]
@@ -159,15 +157,18 @@ with st.container(border=True):
         my_affiliate_url = "https://sbisec.co.jp" # ⚠️ A8.netの「メール用URL」が届いたらここを書き換えてください
         st.link_button("🔥 無料で口座開設する (SBI証券)", my_affiliate_url, use_container_width=True, type="primary")
 
-# ニュースリンクボタン
+# ニュースリンクボタン（検索キーワードのバグを根本修正）
 st.write("---")
 st.markdown(f"### 📰 {selected_company} の最新情報をチェック")
 with st.container(border=True):
     st.write("外部サイトで最新の関連ニュースや企業情報を確認できます。")
-    encoded_keyword = urllib.parse.quote(f"{selected_company} ニュース")
+    
+    # 🛠️ 絵文字などを除いた「ティッカー（AAPLなど）」だけで検索用URLを作る
+    encoded_ticker = urllib.parse.quote(f"{ticker} ニュース")
     
     btn_col1, btn_col2, _ = st.columns(3)
     with btn_col1:
-        st.link_button("🌐 Googleニュースで見る", f"https://google.com{encoded_keyword}&hl=ja&gl=JP&ceid=JP:ja", use_container_width=True)
+        st.link_button("🌐 Googleニュースで見る", f"https://google.com{encoded_ticker}&hl=ja&gl=JP&ceid=JP:ja", use_container_width=True)
     with btn_col2:
-        st.link_button("📈 Yahoo!ファイナンスで見る", f"https://yahoo.co.jp{encoded_keyword}", use_container_width=True)
+        st.link_button("📈 Yahoo!ファイナンスで見る", f"https://yahoo.co.jp{encoded_ticker}", use_container_width=True)
+
