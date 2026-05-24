@@ -43,24 +43,13 @@ selected_period = period_labels[selected_period_label]
 st.title("🇺🇸 米国株トレンドチェッカー PRO")
 st.write("リアルタイム株価、円建て換算、最新ニュース、そして株価チャートをまとめてチェック！")
 
-# 🟢 アフィリエイト広告エリア（信頼感とメリットを大幅強化）
-st.markdown("### 🎁 米国株を始めるなら！おすすめの証券会社")
-with st.container(border=True):
-    col_adv1, col_adv2 = st.columns([2, 1]) # 💡 比率を2:1に修正してエラーを解決
-    with col_adv1:
-        st.write("**💡 なぜ米国株投資で「SBI証券」が選ばれるのか？**")
+ # 📘 使い方ガイド（折りたたみ表示）
+    with st.expander("📘 このツールの使い方・見方のコツ"):
         st.markdown(
-            "- **業界最安水準**の手数料でコストを徹底的に抑られる\n"
-            "- 1株（数千円）から**アップルやエヌビディアの株主**になれる\n"
-            "- 自動で毎月コツコツ買える**「米国株積立」**が非常に便利"
+            "1. 左側のメニューから**気になる企業**と**期間**を選びます。\n"
+            "2. 前日比（%）がプラスなら緑色で表示され、マイナスなら赤色で表示されます。\n"
+            "3. チャートにマウスを乗せると、その日の詳細な株価がピンポイントで確認できます。"
         )
-    with col_adv2:
-        st.write("") # 上下の位置微調整用
-        st.write("")
-        my_affiliate_url = "https://sbisec.co.jp" # ⚠️ A8.netの「メール用URL」が届いたらここを書き換えてください
-        st.link_button("🔥 無料で口座開設する (SBI証券)", my_affiliate_url, use_container_width=True, type="primary")
-
-st.write("---")
 
 # 🟢 見る人へ：今が営業時間外（土日など）か自動判定して説明を出す
 jst = pytz.timezone('Asia/Tokyo')
@@ -192,13 +181,22 @@ with st.spinner("最新データを読み込み中..."):
     except Exception as e:
         st.warning("⚠️ データの取得中に一時的な通信エラーが発生しました。時間を置いてリロードしてください。")
 
-    # 📘 使い方ガイド（折りたたみ表示）
-    with st.expander("📘 このツールの使い方・見方のコツ"):
+   # 🟢 アフィリエイト広告エリア（信頼感とメリットを大幅強化）
+st.markdown("### 🎁 米国株を始めるなら！おすすめの証券会社")
+with st.container(border=True):
+    col_adv1, col_adv2 = st.columns([2, 1]) # 💡 比率を2:1に修正してエラーを解決
+    with col_adv1:
+        st.write("**💡 なぜ米国株投資で「SBI証券」が選ばれるのか？**")
         st.markdown(
-            "1. 左側のメニューから**気になる企業**と**期間**を選びます。\n"
-            "2. 前日比（%）がプラスなら緑色で表示され、マイナスなら赤色で表示されます。\n"
-            "3. チャートにマウスを乗せると、その日の詳細な株価がピンポイントで確認できます。"
+            "- **業界最安水準**の手数料でコストを徹底的に抑られる\n"
+            "- 1株（数千円）から**アップルやエヌビディアの株主**になれる\n"
+            "- 自動で毎月コツコツ買える**「米国株積立」**が非常に便利"
         )
+    with col_adv2:
+        st.write("") # 上下の位置微調整用
+        st.write("")
+        my_affiliate_url = "https://sbisec.co.jp" # ⚠️ A8.netの「メール用URL」が届いたらここを書き換えてください
+        st.link_button("🔥 無料で口座開設する (SBI証券)", my_affiliate_url, use_container_width=True, type="primary")
 
     # ニュースリンクボタン（バグ修正・スマホ最適化済み）
     st.markdown(f"### 📰 {selected_company} の最新情報をチェック")
