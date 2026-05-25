@@ -157,19 +157,19 @@ with st.container(border=True):
         my_affiliate_url = "https://sbisec.co.jp" # ⚠️ A8.netの「メール用URL」が届いたらここを書き換えてください
         st.link_button("🔥 無料で口座開設する (SBI証券)", my_affiliate_url, use_container_width=True, type="primary")
 
-# ニュースリンクボタン（最も確実なシンプルURLに全面改修）
+# ニュースリンクボタン（バグを完全治療した最終版）
 st.write("---")
 st.markdown(f"### 📰 {selected_company} の最新情報をチェック")
 with st.container(border=True):
     st.write("外部サイトで最新の関連ニュースや企業情報を確認できます。")
     
-    # 🔍 「AAPL ニュース」や「NVDA ニュース」の検索ワードを安全に変換
-    encoded_query = urllib.parse.quote(f"{ticker} ニュース")
+    # 🛠️ 100%バグらないように、Python側で完全なURLを先に生成する
+    search_keyword = f"{ticker} ニュース"
+    google_url = "https://google.com?" + urllib.parse.urlencode({"q": search_keyword, "tbm": "nws"})
+    yahoo_url = "https://yahoo.co.jp?" + urllib.parse.urlencode({"p": search_keyword})
     
     btn_col1, btn_col2, _ = st.columns(3)
     with btn_col1:
-        # 🛠️ 壊れる原因だった複雑な引数を全削除！最もシンプルなGoogle検索のニュースタブへ誘導
-        st.link_button("🌐 Googleニュースで見る", f"https://google.com{encoded_query}&tbm=nws", use_container_width=True)
+        st.link_button("🌐 Googleニュースで見る", google_url, use_container_width=True)
     with btn_col2:
-        # 🛠️ Yahoo!ニュースの標準検索URLに変更
-        st.link_button("📈 Yahoo!ニュースで見る", f"https://yahoo.co.jp{encoded_query}", use_container_width=True)
+        st.link_button("📈 Yahoo!ニュースで見る", yahoo_url, use_container_width=True)
