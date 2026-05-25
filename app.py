@@ -2,7 +2,6 @@ import streamlit as st
 import yfinance as yf
 import urllib.parse
 import pandas as pd
-import plotly.express as px
 from datetime import datetime
 import pytz
 
@@ -66,7 +65,7 @@ for t in sorted_tickers:
     name = COMPANY_NAMES.get(t, f"🏢 企業")
     display_options.append(f"{name} ({t})")
 
-selected_option = st.sidebar.selectbox("調べる企業を選してください：", display_options)
+selected_option = st.sidebar.selectbox("調べる企業を選んでください：", display_options)
 
 # 選択されたメニュー名からティッカーを抽出
 ticker = selected_option.split("(")[-1].replace(")", "").strip()
@@ -126,14 +125,13 @@ with st.spinner("最新データを読み込み中..."):
             with col_fx2:
                 forex_chart_data = pd.DataFrame(valid_forex).reset_index()
                 forex_chart_data['Date'] = forex_chart_data['Date'].dt.date
-                
-                fig_fx = px.line(forex_chart_data, x="Date", y="Close", labels={"Close": "円"})
-                fig_fx.update_traces(line_color="#e6550d")
-                fig_fx.update_layout(
-                    height=140, margin=dict(l=10, r=10, t=10, b=10),
-                    xaxis_title=None, yaxis_title=None, hovermode="x unified"
+                st.line_chart(
+                    forex_chart_data, 
+                    x="Date", 
+                    y="Close", 
+                    color="#e6550d", 
+                    height=120
                 )
-                st.plotly_chart(fig_fx, use_container_width=True, config={'displayModeBar': False})
 
         st.write("---")
 
@@ -168,14 +166,12 @@ with st.spinner("最新データを読み込み中..."):
                 st.markdown(f"### 📈 過去{selected_period_label}の株価の動き")
                 chart_data = pd.DataFrame(hist['Close']).reset_index()
                 chart_data['Date'] = chart_data['Date'].dt.date
-                
-                fig_stock = px.line(chart_data, x="Date", y="Close", labels={"Close": "ドル"})
-                fig_stock.update_traces(line_color="#2b83ba")
-                fig_stock.update_layout(
-                    margin=dict(l=10, r=10, t=10, b=10),
-                    xaxis_title=None, yaxis_title=None, hovermode="x unified"
+                st.line_chart(
+                    chart_data, 
+                    x="Date", 
+                    y="Close", 
+                    color="#2b83ba"
                 )
-                st.plotly_chart(fig_stock, use_container_width=True)
             else:
                 st.warning("⚠️ 表示できる株価データが不足しています。期間を延ばして試してください。")
         else:
@@ -184,11 +180,11 @@ with st.spinner("最新データを読み込み中..."):
     except Exception as e:
         st.warning("⚠️ データの取得中に一時的な通信エラーが発生しました。時間を置いてリロードしてください。")
 
-# 🟢 アフィリエイト広告エリア（文字の並び・箇条書きのインデントを美しく修正）
+# 🟢 アフィリエイト広告エリア
 st.write("---")
 st.markdown("### 🎁 米国株を始めるなら！おすすめの証券会社")
 with st.container(border=True):
-    col_adv1, col_adv2 = st.columns([5, 4]) # 💡 左右の文字とボタンのバランスを最適化
+    col_adv1, col_adv2 = st.columns(2)
     with col_adv1:
         st.write("**💡 なぜ米国株投資で「SBI証券」が選ばれるのか？**")
         st.markdown(
@@ -202,7 +198,7 @@ with st.container(border=True):
         my_affiliate_url = "https://sbisec.co.jp" 
         st.link_button("🔥 無料で口座開設する (SBI証券)", my_affiliate_url, use_container_width=True, type="primary")
 
-# ニュースリンクボタン（並びを2分割にしてすっきり配置）
+# ニュースリンクボタン
 st.write("---")
 st.markdown(f"### 📰 {selected_company} の最新情報をチェック")
 with st.container(border=True):
@@ -212,7 +208,7 @@ with st.container(border=True):
     google_url = "https://google.com?" + urllib.parse.urlencode({"q": search_keyword, "tbm": "nws"})
     yahoo_url = "https://yahoo.co.jp?" + urllib.parse.urlencode({"p": search_keyword})
     
-    btn_col1, btn_col2 = st.columns(2) # 💡 2列にしてボタンを均等に大きく配置
+    btn_col1, btn_col2 = st.columns(2)
     with btn_col1:
         st.link_button("🌐 Googleニュースで見る", google_url, use_container_width=True)
     with btn_col2:
