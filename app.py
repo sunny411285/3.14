@@ -90,7 +90,7 @@ with st.expander("📘 このツールの使い方・見方のコツ", expanded=
     st.markdown(
         "- **企業を選ぶ**：左側のメニューから気になる企業を切り替えられます。\n"
         "- **期間を変える**：表示したいチャートの期間（1ヶ月〜5年）を自由に変更できます。\n"
-        "- **データを見る**：チャートにマウスや指を乗せると、その日の詳細な株価が浮かび上がります。"
+        "- **データを見る**：チャートにマウスや指を乗せることで、詳細な株価が浮かび上がります。"
     )
 
 # 🟢 営業時間に関する案内メッセージ
@@ -125,12 +125,14 @@ with st.spinner("最新データを読み込み中..."):
             with col_fx2:
                 forex_chart_data = pd.DataFrame(valid_forex).reset_index()
                 forex_chart_data['Date'] = forex_chart_data['Date'].dt.date
+                # 🛠️ 縮尺を固定制限（zoom_config=False）してはみ出しを解消！
                 st.line_chart(
                     forex_chart_data, 
                     x="Date", 
                     y="Close", 
                     color="#e6550d", 
-                    height=120
+                    height=120,
+                    zoom_config=False
                 )
 
         st.write("---")
@@ -166,11 +168,13 @@ with st.spinner("最新データを読み込み中..."):
                 st.markdown(f"### 📈 過去{selected_period_label}の株価の動き")
                 chart_data = pd.DataFrame(hist['Close']).reset_index()
                 chart_data['Date'] = chart_data['Date'].dt.date
+                # 🛠️ 縮尺を固定制限（zoom_config=False）してはみ出しを解消！
                 st.line_chart(
                     chart_data, 
                     x="Date", 
                     y="Close", 
-                    color="#2b83ba"
+                    color="#2b83ba",
+                    zoom_config=False
                 )
             else:
                 st.warning("⚠️ 表示できる株価データが不足しています。期間を延ばして試してください。")
@@ -180,7 +184,7 @@ with st.spinner("最新データを読み込み中..."):
     except Exception as e:
         st.warning("⚠️ データの取得中に一時的な通信エラーが発生しました。時間を置いてリロードしてください。")
 
-# 🟢 アフィリエイト広告エリア
+# --- 🟢 アフィリエイト広告エリア ---
 st.write("---")
 st.markdown("### 🎁 米国株を始めるなら！おすすめの証券会社")
 with st.container(border=True):
@@ -198,7 +202,7 @@ with st.container(border=True):
         my_affiliate_url = "https://sbisec.co.jp" 
         st.link_button("🔥 無料で口座開設する (SBI証券)", my_affiliate_url, use_container_width=True, type="primary")
 
-# ニュースリンクボタン
+# --- 📰 ニュースリンクボタン ---
 st.write("---")
 st.markdown(f"### 📰 {selected_company} の最新情報をチェック")
 with st.container(border=True):
