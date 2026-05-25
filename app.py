@@ -123,16 +123,16 @@ with st.spinner("最新データを読み込み中..."):
                 )
                 st.caption("プラス ＝ 円安ドル高 / マイナス ＝ 円高ドル安")
             with col_fx2:
+                # 🛠️ エラーの原因だった引数をすべて削除！
                 forex_chart_data = pd.DataFrame(valid_forex).reset_index()
-                forex_chart_data['Date'] = forex_chart_data['Date'].dt.date
-                # 🛠️ 縮尺を固定制限（zoom_config=False）してはみ出しを解消！
+                # 日付を固定の文字列（テキスト）に変えることで、右端が絶対に削られないチャートにします
+                forex_chart_data['Date'] = forex_chart_data['Date'].dt.strftime('%Y-%m-%d')
                 st.line_chart(
                     forex_chart_data, 
                     x="Date", 
                     y="Close", 
                     color="#e6550d", 
-                    height=120,
-                    zoom_config=False
+                    height=120
                 )
 
         st.write("---")
@@ -167,14 +167,13 @@ with st.spinner("最新データを読み込み中..."):
                 # 個別株の折れ線グラフ
                 st.markdown(f"### 📈 過去{selected_period_label}の株価の動き")
                 chart_data = pd.DataFrame(hist['Close']).reset_index()
-                chart_data['Date'] = chart_data['Date'].dt.date
-                # 🛠️ 縮尺を固定制限（zoom_config=False）してはみ出しを解消！
+                # 日付を固定の文字列（テキスト）に変えることで、右端が絶対に削られないチャートにします
+                chart_data['Date'] = chart_data['Date'].dt.strftime('%Y-%m-%d')
                 st.line_chart(
                     chart_data, 
                     x="Date", 
                     y="Close", 
-                    color="#2b83ba",
-                    zoom_config=False
+                    color="#2b83ba"
                 )
             else:
                 st.warning("⚠️ 表示できる株価データが不足しています。期間を延ばして試してください。")
