@@ -81,15 +81,15 @@ with st.spinner("最新データを読み込み中..."):
                 )
                 st.caption("プラス＝円安ドル高 / マイナス＝円高ドル安")
             with col_fx2:
-                # 直近1ヶ月の為替推移ミニグラフ
+                # 🛠️ 為替グラフが映らないバグを修正：日付データを完全にグラフ用に変換
                 forex_chart_data = pd.DataFrame(valid_forex).reset_index()
+                forex_chart_data['Date'] = forex_chart_data['Date'].dt.date # 日付形式をシンプル化
                 st.line_chart(
                     forex_chart_data, 
                     x="Date", 
                     y="Close", 
                     color="#e6550d", 
-                    height=100,
-                    zoom_config=False
+                    height=120
                 )
 
         st.write("---")
@@ -124,12 +124,12 @@ with st.spinner("最新データを読み込み中..."):
                 # 個別株の折れ線グラフ
                 st.markdown(f"### 📈 過去{selected_period_label}の株価の動き")
                 chart_data = pd.DataFrame(hist['Close']).reset_index()
+                chart_data['Date'] = chart_data['Date'].dt.date # 日付形式をシンプル化
                 st.line_chart(
                     chart_data, 
                     x="Date", 
                     y="Close", 
-                    color="#2b83ba", 
-                    zoom_config=False
+                    color="#2b83ba"
                 )
             else:
                 st.warning("⚠️ 表示できる株価データが不足しています。期間を延ばして試してください。")
@@ -157,13 +157,12 @@ with st.container(border=True):
         my_affiliate_url = "https://sbisec.co.jp" # ⚠️ A8.netの「メール用URL」が届いたらここを書き換えてください
         st.link_button("🔥 無料で口座開設する (SBI証券)", my_affiliate_url, use_container_width=True, type="primary")
 
-# ニュースリンクボタン（バグを完全治療した最終版）
+# ニュースリンクボタン
 st.write("---")
 st.markdown(f"### 📰 {selected_company} の最新情報をチェック")
 with st.container(border=True):
     st.write("外部サイトで最新の関連ニュースや企業情報を確認できます。")
     
-    # 🛠️ 100%バグらないように、Python側で完全なURLを先に生成する
     search_keyword = f"{ticker} ニュース"
     google_url = "https://google.com?" + urllib.parse.urlencode({"q": search_keyword, "tbm": "nws"})
     yahoo_url = "https://yahoo.co.jp?" + urllib.parse.urlencode({"p": search_keyword})
