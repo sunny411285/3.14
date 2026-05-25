@@ -9,27 +9,58 @@ import pytz
 # ページの設定（横幅を広くしてグラフを見やすくする）
 st.set_page_config(layout="wide", page_title="米国株トレンドチェッカー PRO", page_icon="🇺🇸")
 
-# --- 🚀 デザイン：サイドバーに設定を集約 ---
+# --- 🚀 初期データの設定（コストコ COST を追加！） ---
+TICKERS = ["AAPL", "MSFT", "NVDA", "TSLA", "GOOGL", "AMZN", "META", "NFLX", "AVGO", "SBUX", "KO", "MCD", "V", "COST"]
+
+COMPANY_NAMES = {
+    "AAPL": "🍎 Apple", "MSFT": "💻 Microsoft", "NVDA": "🤖 NVIDIA", 
+    "TSLA": "🚗 Tesla", "GOOGL": "🔍 Google", "AMZN": "📦 Amazon", 
+    "META": "📱 Meta", "NFLX": "🍿 Netflix", "AVGO": "📡 Broadcom", 
+    "SBUX": "☕ Starbucks", "KO": "🥤 Coca-Cola", "MCD": "🍟 McDonald's", 
+    "V": "💳 Visa", "COST": "🛒 Costco"
+}
+
+# --- ⚙️ サイドバー：表示設定と並び替え機能 ---
 st.sidebar.header("⚙️ 表示設定")
 
-# 1. 企業のリスト（最新のAI注目企業「Broadcom」を追加！）
-companies = {
-    "🍎 Apple (AAPL)": "AAPL",
-    "💻 Microsoft (MSFT)": "MSFT",
-    "🤖 NVIDIA (NVDA)": "NVDA",
-    "🚗 Tesla (TSLA)": "TSLA",
-    "🔍 Google (GOOGL)": "GOOGL",
-    "📦 Amazon (AMZN)": "AMZN",
-    "📱 Meta (META)": "META",
-    "🍿 Netflix (NFLX)": "NFLX",
-    "📡 Broadcom (AVGO)": "AVGO",
-    "☕ Starbucks (SBUX)": "SBUX" ,
-    "🥤 Coca-Cola (KO)": "KO",
-    "🍟 McDonald's (MCD)": "MCD",
-    "💳 Visa (V)": "V"
-}
-selected_company = st.sidebar.selectbox("調べる企業を選んでください：", list(companies.keys()))
-ticker = companies[selected_company]
+# 🟢 【新機能】並び替え方法の選択
+sort_method = st.sidebar.radio(
+    "企業の並び替え：",
+    ["標準", "アルファベット順 (A-Z)", "株価が高い順"]
+)
+
+# 💡 選択された方法に応じてリストを並び替える処理
+if sort_method == "アルファベット順 (A-Z)":
+    sorted_tickers = sorted(TICKERS)
+elif sort_method == "株価が高い順":
+    with st.sidebar.spinner("株価順に並び替え中..."):
+        price_list = []
+        for t in TICKERS:
+            try:
+                # 最小限のデータ（1日分）だけ取って最速で最新株価を取得
+                tick_data = yf.Ticker(t).history(period="1d")
+                current_p = tick_data['Close'].iloc[-1] if not tick_data.empty else 0
+                price_list.append({"ticker": t, "price": current_p})
+            except:
+                price_list.append({"ticker": t, "price": 0})
+        
+        # 株価のデータフレームを作って高い順にソート
+        df_price = pd.DataFrame(price_list).sort_values(by="price", ascending=False)
+        sorted_tickers = df_price["ticker"].tolist()
+else:
+    sorted_tickers = TICKERS # 標準（コードに書いた順）
+
+# セレクトボックスに表示するメニュー名を作成
+display_options = []
+for t in sorted_tickers:
+    name = COMPANY_NAMES.get(t, f"🏢 企業")
+    display_options.append(f"{name} ({t})")
+
+selected_option = st.sidebar.selectbox("調べる企業を選んでください：", display_options)
+
+# 選択されたメニュー名からティッカーを抽出
+ticker = selected_option.split("(")[-1].replace(")", "").strip()
+selected_company = selected_option
 
 # 📊 株価チャートの期間設定
 period_labels = {
@@ -83,7 +114,6 @@ with st.spinner("最新データを読み込み中..."):
                 )
                 st.caption("プラス＝円安ドル高 / マイナス＝円高ドル安")
             with col_fx2:
-                # 🛠️ 為替グラフの日付データを安全な形式にリセットして描画
                 forex_chart_data = pd.DataFrame(valid_forex).reset_index()
                 forex_chart_data['Date'] = forex_chart_data['Date'].dt.date
                 st.line_chart(
@@ -141,7 +171,7 @@ with st.spinner("最新データを読み込み中..."):
     except Exception as e:
         st.warning("⚠️ データの取得中に一時的な通信エラーが発生しました。時間を置いてリロードしてください。")
 
-# 🟢 アフィリエイト広告エリア（チャートの下、ニュースの上に配置）
+# 🟢 アフィリエイト広告エリア
 st.write("---")
 st.markdown("### 🎁 米国株を始めるなら！おすすめの証券会社")
 with st.container(border=True):
@@ -156,10 +186,10 @@ with st.container(border=True):
     with col_adv2:
         st.write("") 
         st.write("")
-        my_affiliate_url = "https://sbisec.co.jp" # ⚠️ A8.netの「メール用URL」が届いたらここを書き換えてください
+        my_affiliate_url = "https://sbisec.co.jp" 
         st.link_button("🔥 無料で口座開設する (SBI証券)", my_affiliate_url, use_container_width=True, type="primary")
 
-# ニュースリンクボタン（Pythonの専用関数でURLを安全に自動生成する最終版）
+# ニュースリンクボタン
 st.write("---")
 st.markdown(f"### 📰 {selected_company} の最新情報をチェック")
 with st.container(border=True):
