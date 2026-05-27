@@ -250,4 +250,3 @@ elif page_choice == "💡 投資初心者向けナビ":
             st.write("米国株は普段使っている銀行口座では買えません。手数料が圧倒的に安い**「ネット証券」**の口座をネットから開設します。")
     with col_st2:
         with st.container(border=True):
-
