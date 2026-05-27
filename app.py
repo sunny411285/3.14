@@ -22,7 +22,7 @@ COMPANY_NAMES = {
 # ==========================================
 # 1. サイドバー：メインメニュー（画面切り替え）
 # ==========================================
-st.sidebar.title("📌 メインメニュー")
+st.sidebar.title("📌 メメインメニュー")
 page_choice = st.sidebar.radio(
     "表示する機能を選んでください：",
     ["📊 米国株トレンドチェッカー", "💡 投資初心者向けナビ", "❓ よくある質問（FAQ）"]
@@ -92,7 +92,7 @@ if page_choice == "📊 米国株トレンドチェッカー":
 
     st.sidebar.markdown("---") # 区切り線
 
-    # 📊 株価チャートの期間設定（チェッカー画面のみに表示）
+    # 📊 株価チャートの期間設定（企業の選択が行われた後に配置してエラーを防止）
     period_labels = {
         "1ヶ月": "1mo",
         "6ヶ月": "6mo",
@@ -232,21 +232,22 @@ if page_choice == "📊 米国株トレンドチェッカー":
         with col_adv2:
             st.write("") 
             st.write("")
-            # 💡 本番時はここをご自身のアフィリエイトリンク（「A8.net」や「アクセストレード」等の発行URL）に書き換えてください
             my_affiliate_url = "https://sbisec.co.jp" 
             st.link_button("🔥 無料で口座開設する (SBI証券)", my_affiliate_url, use_container_width=True, type="primary")
 
 
-# --- 【新機能：アフィリエイト用】投資初心者向けナビ ---
+# --- 💡 投資初心者向けナビ ---
 elif page_choice == "💡 投資初心者向けナビ":
-    st.title("💡 投資初心者向けおすすめナビ")
-    st.write("米国株投資をこれから始める方へ、分かりやすく手順を解説します。")
-    st.info("💡 株価分析に戻りたい場合は、左のメニューから「米国株トレンドチェッカー」を選んでください。")
+    st.title("💡 投資初心者向け 米国株スタートガイド")
+    st.write("「米国株に興味はあるけど、始め方がわからない…」という方向けに、最短で投資デビューする手順を分かりやすく解説します。")
+    st.info("💡 いつでも左メニューの「米国株トレンドチェッカー」からリアルタイム株価分析に戻ることができます。")
     
-    col1, col2 = st.columns(2)
-    with col1:
-        st.subheader("🏦 おすすめの証券会社")
-        st.write("米国株の取引手数料が格安で、使いやすい大手ネット証券口座の開設がスタートの第一歩です。")
-        # 💡 ここにもご自身のアフィリエイトリンク（SBI証券など）を入れます
-        st.link_button("👉 口座開設（無料）はこちらから", "https://sbisec.co.jp", type="primary")
+    st.markdown("## 🛠️ 米国株を始める3ステップ")
+    col_st1, col_st2, col_st3 = st.columns(3)
+    with col_st1:
+        with st.container(border=True):
+            st.subheader("Step 1. 証券口座を選ぶ")
+            st.write("米国株は普段使っている銀行口座では買えません。手数料が圧倒的に安い**「ネット証券」**の口座をネットから開設します。")
+    with col_st2:
+
         
