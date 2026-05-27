@@ -230,8 +230,6 @@ if page_choice == "📊 米国株トレンドチェッカー":
                 "- **便利な米国株積立**：自動で毎月コツコツ買い付けできる機能が非常に便利。"
             )
         with col_adv2:
-            st.write("") 
-            st.write("")
             my_affiliate_url = "https://sbisec.co.jp" 
             st.link_button("🔥 無料で口座開設する (SBI証券)", my_affiliate_url, use_container_width=True, type="primary")
 
@@ -250,4 +248,5 @@ elif page_choice == "💡 投資初心者向けナビ":
             st.write("米国株は普段使っている銀行口座では買えません。手数料が圧倒的に安い**「ネット証券」**の口座をネットから開設します。")
     with col_st2:
         with st.container(border=True):
+            st.subheader("Step 2. 資金を入金する")
 
