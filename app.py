@@ -2,52 +2,31 @@ import streamlit as st
 import yfinance as yf
 import urllib.parse
 import pandas as pd
-from datetime import datetime
-import pytz
 
-# ページの設定（横幅を広くしてグラフを見やすくする）
+# ページの設定
 st.set_page_config(layout="wide", page_title="米国株トレンドチェッカー PRO", page_icon="🇺🇸")
 
 # --- 🚀 初期データの設定 ---
 TICKERS = ["AAPL", "MSFT", "NVDA", "TSLA", "GOOGL", "AMZN", "META", "NFLX", "AVGO", "SBUX", "KO", "MCD", "V", "COST"]
-
 COMPANY_NAMES = {
-    "AAPL": "🍎 Apple", "MSFT": "💻 Microsoft", "NVDA": "🤖 NVIDIA", 
-    "TSLA": "🚗 Tesla", "GOOGL": "🔍 Google", "AMZN": "📦 Amazon", 
-    "META": "📱 Meta", "NFLX": "🍿 Netflix", "AVGO": "📡 Broadcom", 
-    "SBUX": "☕ Starbucks", "KO": "🥤 Coca-Cola", "MCD": "🍟 McDonald's", 
+    "AAPL": "🍎 Apple", "MSFT": "💻 Microsoft", "NVDA": "🤖 NVIDIA", "TSLA": "🚗 Tesla", 
+    "GOOGL": "🔍 Google", "AMZN": "📦 Amazon", "META": "📱 Meta", "NFLX": "🍿 Netflix", 
+    "AVGO": "📡 Broadcom", "SBUX": "☕ Starbucks", "KO": "🥤 Coca-Cola", "MCD": "🍟 McDonald's", 
     "V": "💳 Visa", "COST": "🛒 Costco"
 }
 
 # ==========================================
-# 1. サイドバー：メインメニュー（画面切り替え）
+# 1. サイドバー：メインメニュー
 # ==========================================
 st.sidebar.title("📌 メインメニュー")
-page_choice = st.sidebar.radio(
-    "表示する機能を選んでください：",
-    ["📊 米国株トレンドチェッカー", "💡 投資初心者向けナビ", "❓ よくある質問（FAQ）"]
-)
-
-st.sidebar.markdown("---") # 区切り線
-
-
-# ==========================================
-# 2. 選ばれたメニューに応じて画面を切り替える
-# ==========================================
+page_choice = st.sidebar.radio("表示機能を選択：", ["📊 米国株チェッカー", "💡 初心者向けナビ", "❓ よくある質問(FAQ)"])
+st.sidebar.markdown("---")
 
 # --- 【メイン機能】米国株トレンドチェッカー ---
-if page_choice == "📊 米国株トレンドチェッカー":
-
-    # --- ⚙️ サイドバー：表示設定と並び替え機能 ---
+if page_choice == "📊 米国株チェッカー":
     st.sidebar.header("⚙️ 表示設定")
+    sort_method = st.sidebar.radio("並び替え：", ["標準（注目順）", "アルファベット順 (A-Z)", "株価が高い順"])
 
-    # 並び替え方法の選択
-    sort_method = st.sidebar.radio(
-        "企業の並び替え：",
-        ["標準（今のおすすめ・注目度順）", "アルファベット順 (A-Z)", "株価が高い順"]
-    )
-
-    # 選択された方法に応じてリストを並び替える処理
     if sort_method == "アルファベット順 (A-Z)":
         sorted_tickers = sorted(TICKERS)
     elif sort_method == "株価が高い順":
@@ -55,198 +34,138 @@ if page_choice == "📊 米国株トレンドチェッカー":
             price_list = []
             for t in TICKERS:
                 try:
-                    tick_data = yf.Ticker(t).history(period="1d")
-                    current_p = tick_data['Close'].iloc[-1] if not tick_data.empty else 0
-                    price_list.append({"ticker": t, "price": current_p})
-                except:
-                    price_list.append({"ticker": t, "price": 0})
-            df_price = pd.DataFrame(price_list).sort_values(by="price", ascending=False)
-            sorted_tickers = df_price["ticker"].tolist()
+                    p = yf.Ticker(t).history(period="1d")['Close'].iloc[-1]
+                    price_list.append({"t": t, "p": p})
+                except: price_list.append({"t": t, "p": 0})
+            sorted_tickers = pd.DataFrame(price_list).sort_values(by="p", ascending=False)["t"].tolist()
     else:
-        with st.sidebar.spinner("最新の市場データから注目順を計算中..."):
-            recommend_list = []
+        with st.sidebar.spinner("注目順を計算中..."):
+            recom_list = []
             for t in TICKERS:
                 try:
-                    tick_data = yf.Ticker(t).history(period="1d")
-                    if not tick_data.empty:
-                        total_money = tick_data['Close'].iloc[-1] * tick_data['Volume'].iloc[-1]
-                    else:
-                        total_money = 0
-                    recommend_list.append({"ticker": t, "score": total_money})
-                except:
-                    recommend_list.append({"ticker": t, "score": 0})
-            df_recommend = pd.DataFrame(recommend_list).sort_values(by="score", ascending=False)
-            sorted_tickers = df_recommend["ticker"].tolist()
+                    h = yf.Ticker(t).history(period="1d")
+                    score = h['Close'].iloc[-1] * h['Volume'].iloc[-1] if not h.empty else 0
+                    recom_list.append({"t": t, "s": score})
+                except: recom_list.append({"t": t, "s": 0})
+            sorted_tickers = pd.DataFrame(recom_list).sort_values(by="s", ascending=False)["t"].tolist()
 
-    # セレクトボックスに表示するメニュー名を作成
-    display_options = []
-    for t in sorted_tickers:
-        name = COMPANY_NAMES.get(t, f"🏢 企業")
-        display_options.append(f"{name} ({t})")
-
-    selected_option = st.sidebar.selectbox("調べる企業を選んでください：", display_options)
-
-    # 選択されたメニュー名からティッカーを抽出
+    display_options = [f"{COMPANY_NAMES.get(t, '🏢 企業')} ({t})" for t in sorted_tickers]
+    selected_option = st.sidebar.selectbox("企業を選んでください：", display_options)
     ticker = selected_option.split("(")[-1].replace(")", "").strip()
     selected_company = selected_option
 
-    st.sidebar.markdown("---") # 区切り線
+    st.sidebar.markdown("---")
+    period_labels = {"1ヶ月": "1mo", "6ヶ月": "6mo", "1年": "1y", "5年": "5y"}
+    selected_p_label = st.sidebar.radio("表示期間を変更：", list(period_labels.keys()))
+    selected_period = period_labels[selected_p_label]
 
-    # 📊 株価チャートの期間設定
-    period_labels = {
-        "1ヶ月": "1mo",
-        "6ヶ月": "6mo",
-        "1年": "1y",
-        "5年": "5y"
-    }
-    selected_period_label = st.sidebar.radio("表示期間を変更できます：", list(period_labels.keys()), horizontal=False)
-    selected_period = period_labels[selected_period_label]
-
-    # --- 📱 メインコンテンツエリア ---
     st.title("🇺🇸 米国株トレンドチェッカー PRO")
-    st.write("リアルタイム株価、円建て換算、最新ニュース、そして株価チャートをまとめてチェック！")
+    with st.expander("📘 ツールの見方のコツ", expanded=True):
+        st.markdown("- **企業選択**：左メニューから気になる企業を切り替え可能\n- **期間変更**：チャートの表示期間を自由に変更可能\n- **データ確認**：チャートに触れると詳細な株価を表示")
 
-    # 🟢 使い方ガイド
-    with st.expander("📘 このツールの使い方・見方のコツ", expanded=True):
-        st.markdown(
-            "- **企業を選ぶ**：左側のメニューから気になる企業を切り替えられます。\n"
-            "- **期間を変える**：表示したいチャートの期間（1ヶ月〜5年）を自由に変更できます。\n"
-            "- **データを見る**：チャートにマウスや指を乗せることで、詳細な株価が浮かび上がります。"
-        )
+    st.info("💡 現在は「直近の確定データ」を表示しています。米市場の営業時間（日本時間 平日夜）にアクセスするとリアルタイムに株価が動きます。")
 
-    # 🟢 営業時間に関する案内メッセージ
-    st.info("💡 **【アプリを見に来てくれた方へ】** 現在、画面には「直近の最終記録（確定データ）」を表示しています。アメリカの株式市場の営業時間内（平日の日本時間 22:30〜翌5:00、冬時間は23:30〜翌6:00）にアクセスすると、リアルタイムに株価が変動するチャートをご覧いただけます。")
-
-    with st.spinner("最新データを読み込み中..."):
+    with st.spinner("データ読み込み中..."):
         try:
-            # 🟢 為替データの取得
-            forex = yf.Ticker("JPY=X")
-            forex_hist = forex.history(period="1mo")
-            
-            if not forex_hist.empty:
-                valid_forex = forex_hist['Close'].dropna()
-                usd_jpy = valid_forex.iloc[-1]
-                prev_usd_jpy = valid_forex.iloc[-2]
-                forex_pct_change = ((usd_jpy - prev_usd_jpy) / prev_usd_jpy) * 100
-            else:
-                usd_jpy = 150.0
-                forex_pct_change = 0.0
+            forex = yf.Ticker("JPY=X").history(period="1mo")
+            if not forex.empty:
+                v_fx = forex['Close'].dropna()
+                usd_jpy, prev_fx = v_fx.iloc[-1], v_fx.iloc[-2]
+                fx_change = ((usd_jpy - prev_fx) / prev_fx) * 100
+            else: usd_jpy, fx_change = 150.0, 0.0
 
-            # 📈 為替レート（ドル円）表示エリア
             st.markdown("### 💴 為替レート（米ドル / 日本円）")
             with st.container(border=True):
-                col_fx1, col_fx2 = st.columns(2)
-                with col_fx1:
-                    st.metric(
-                        label="直近の確定為替レート", 
-                        value=f"1ドル = {usd_jpy:.2f} 円", 
-                        delta=f"{forex_pct_change:.2f}% (前日比)"
-                    )
-                    st.caption("プラス ＝ 円安ドル高 / マイナス ＝ 円高ドル安")
-                with col_fx2:
-                    forex_chart_data = pd.DataFrame(valid_forex).reset_index()
-                    forex_chart_data['Date'] = forex_chart_data['Date'].dt.strftime('%Y-%m-%d')
-                    st.line_chart(
-                        forex_chart_data, 
-                        x="Date", 
-                        y="Close", 
-                        color="#e6550d", 
-                        height=120
-                    )
+                c_fx1, c_fx2 = st.columns(2)
+                c_fx1.metric(label="確定為替レート", value=f"1ドル = {usd_jpy:.2f} 円", delta=f"{fx_change:.2f}% (前日比)")
+                fx_data = pd.DataFrame(v_fx).reset_index()
+                fx_data['Date'] = fx_data['Date'].dt.strftime('%Y-%m-%d')
+                with c_fx2: st.line_chart(fx_data, x="Date", y="Close", color="#e6550d", height=120)
 
             st.write("---")
-
-            # 🟢 個別株データの取得
-            stock_data = yf.Ticker(ticker)
-            hist = stock_data.history(period=selected_period)
-
+            hist = yf.Ticker(ticker).history(period=selected_period)
             if hist is not None and not hist.empty:
                 hist = hist.dropna(subset=['Close'])
-                
                 if len(hist) >= 2:
-                    current_price_usd = hist['Close'].iloc[-1]
-                    prev_price_usd = hist['Close'].iloc[-2]
-                    
-                    if current_price_usd <= 0.01 and len(hist) >= 3:
-                        current_price_usd = hist['Close'].iloc[-2]
-                        prev_price_usd = hist['Close'].iloc[-3]
-                    
-                    pct_change = ((current_price_usd - prev_price_usd) / prev_price_usd) * 100
-                    current_price_jpy = current_price_usd * usd_jpy
+                    cur_usd = hist['Close'].iloc[-1]
+                    prev_usd = hist['Close'].iloc[-2]
+                    pct_change = ((cur_usd - prev_usd) / prev_usd) * 100
+                    cur_jpy = cur_usd * usd_jpy
 
-                    # 個別株カード表示
-                    st.markdown(f"### 📍 {selected_company} の現在値（または直近終値）")
+                    st.markdown(f"### 📍 {selected_company} の現在値（直近終値）")
                     with st.container(border=True):
                         col1, col2, col3 = st.columns(3)
-                        col1.metric(label="株価 (ドル)", value=f"${current_price_usd:.2f}")
-                        col2.metric(label="株価 (日本円)", value=f"約 {int(current_price_jpy):,} 円")
+                        col1.metric(label="株価 (ドル)", value=f"${cur_usd:.2f}")
+                        col2.metric(label="株価 (日本円)", value=f"約 {int(cur_jpy):,} 円")
                         col3.metric(label="前日比 (%)", value=f"{pct_change:.2f}%", delta=f"{pct_change:.2f}%")
-                        st.caption(f"換算為替レート: 1ドル = {usd_jpy:.2f}円")
 
-                    # 個別株の折れ線グラフ
-                    st.markdown(f"### 📈 過去{selected_period_label}の株価の動き")
+                    st.markdown(f"### 📈 過去{selected_p_label}の株価の動き")
                     chart_data = pd.DataFrame(hist['Close']).reset_index()
                     chart_data['Date'] = chart_data['Date'].dt.strftime('%Y-%m-%d')
-                    st.line_chart(
-                        chart_data, 
-                        x="Date", 
-                        y="Close", 
-                        color="#2b83ba"
-                    )
-                else:
-                    st.warning("⚠️ 表示できる株価データが不足しています。期間を延ばして試してください。")
-            else:
-                st.warning("⚠️ Yahoo Financeのアクセス制限により、現在株価データを一時的に読み込めません。時間を置いてからリロードしてください。")
-                
-        except Exception as e:
-            st.warning("⚠️ データの取得中に一時的な通信エラーが発生しました。時間を置いてリロードしてください。")
+                    st.line_chart(chart_data, x="Date", y="Close", color="#2b83ba")
+                else: st.warning("⚠️ 表示できるデータが不足しています。")
+            else: st.warning("⚠️ データを読み込めません。リロードしてください。")
+        except Exception as e: st.warning("⚠️ 一時的な通信エラーが発生しました。")
 
-    # --- 📰 ニュースリンクボタン ---
     st.write("---")
     st.markdown(f"### 📰 {selected_company} の最新情報をチェック")
     with st.container(border=True):
-        st.write("外部サイトで最新の関連ニュースや企業情報を確認できます。")
-        
-        search_keyword = f"{ticker} ニュース"
-        google_url = "https://google.com?" + urllib.parse.urlencode({"q": search_keyword, "tbm": "nws"})
-        yahoo_url = "https://yahoo.co.jp?" + urllib.parse.urlencode({"p": search_keyword})
-        
-        btn_col1, btn_col2 = st.columns(2)
-        with btn_col1:
-            st.link_button("🌐 Googleニュースで見る", google_url, use_container_width=True)
-        with btn_col2:
-            st.link_button("🇯🇵 Yahoo! JAPANで検索する", yahoo_url, use_container_width=True)
+        keyword = f"{ticker} ニュース"
+        g_url = "https://google.com?" + urllib.parse.urlencode({"q": keyword, "tbm": "nws"})
+        y_url = "https://yahoo.co.jp?" + urllib.parse.urlencode({"p": keyword})
+        b1, b2 = st.columns(2)
+        b1.link_button("🌐 Googleニュースで見る", g_url, use_container_width=True)
+        b2.link_button("🇯🇵 Yahoo! JAPANで検索する", y_url, use_container_width=True)
 
-    # --- 🟢 アフィリエイト広告エリア ---
     st.write("---")
     st.markdown("### 🎁 米国株を始めるなら！おすすめの証券会社")
     with st.container(border=True):
-        col_adv1, col_adv2 = st.columns(2)
-        with col_adv1:
-            st.write("**💡 なぜ米国株投資で「SBI証券」が選ばれるのか？**")
-            st.markdown(
-                "- **業界最安水準の手数料**：無駄なコストを徹底的に抑えて投資できます。\n"
-                "- **数千円から株主に**：アップルやエヌビディアの株を1株から購入可能。\n"
-                "- **便利な米国株積立**：自動で毎月コツコツ買い付けできる機能が非常に便利。"
-            )
-        with col_adv2:
-            my_affiliate_url = "https://sbisec.co.jp" 
-            st.link_button("🔥 無料で口座開設する (SBI証券)", my_affiliate_url, use_container_width=True, type="primary")
-
+        adv1, adv2 = st.columns(2)
+        adv1.markdown("**💡 SBI証券が選ばれる理由**\n- **業界最安水準の手数料**：コストを徹底的に抑制\n- **数千円から株主に**：大物米国株を1株から購入可能\n- **便利な定期積立**：自動で毎月コツコツ買い付け可能")
+        with adv2:
+            st.write(""); st.write("")
+            st.link_button("🔥 無料で口座開設する (SBI証券)", "https://sbisec.co.jp", use_container_width=True, type="primary")
 
 # --- 💡 投資初心者向けナビ ---
-elif page_choice == "💡 投資初心者向けナビ":
+elif page_choice == "💡 初心者向けナビ":
     st.title("💡 投資初心者向け 米国株スタートガイド")
-    st.write("「米国株に興味はあるけど、始め方がわからない…」という方向けに、最短で投資デビューする手順を分かりやすく解説します。")
-    st.info("💡 いつでも左メニューの「米国株トレンドチェッカー」からリアルタイム株価分析に戻ることができます。")
+    st.info("💡 左メニューから「📊 米国株チェッカー」を選べばいつでも株価分析に戻れます。")
     
     st.markdown("## 🛠️ 米国株を始める3ステップ")
-    col_st1, col_st2, col_st3 = st.columns(3)
-    with col_st1:
+    st1, st2, st3 = st.columns(3)
+    st1.markdown("### 1. 証券口座を選ぶ\n手数料が圧倒的に安い**「ネット証券」**の口座をオンラインで開設します。")
+    st2.markdown("### 2. 資金を入金する\n口座に日本円を入金。日本円のまま米国株を買える「円貨決済」があるので両替の手間は不要です。")
+    st3.markdown("### 3. 1株から購入する\n米国株は**1株（数千円〜）**で購入可能！本サイト掲載の大企業も少額ですぐ株主になれます。")
+
+    st.markdown("---")
+    st.markdown("## 📊 おすすめの2大ネット証券会社")
+    bk1, bk2 = st.columns(2)
+    with bk1:
         with st.container(border=True):
-            st.subheader("Step 1. 証券口座を選ぶ")
-            st.write("米国株は普段使っている銀行口座では買えません。手数料が圧倒的に安い**「ネット証券」**の口座をネットから開設します。")
-    with col_st2:
+            st.subheader("👑 SBI証券 (人気・実績No.1)")
+            st.markdown("- **手数料**: 業界最安水準\n- **強み**: 毎月自動で株を買い足す**「定期買付」**が非常に優秀\n- **おすすめ**: コツコツ積立貯金感覚で始めたい方")
+            st.link_button("🚀 SBI証券で口座開設する（無料）", "https://sbisec.co.jp", type="primary", use_container_width=True)
+    with bk2:
         with st.container(border=True):
-            st.subheader("Step 2. 資金を入金する")
+            st.subheader("🔴 楽天証券 (使いやすさNo.1)")
+            st.markdown("- **手数料**: 業界最安水準\n- **強み**: アプリ**「iSPEED」**が抜群に見やすく初心者向け。楽天ポイント利用も可能\n- **おすすめ**: 楽天経済圏の方や操作性を重視する方")
+            st.link_button("👉 楽天証券で口座開設する（無料）", "https://rakuten-sec.co.jp", use_container_width=True)
+
+# --- ❓ よくある質問（FAQ） ---
+elif page_choice == "❓ よくある質問（FAQ）":
+    st.title("❓ よくある質問（FAQ）")
+    st.info("💡 左メニューから「📊 米国株チェッカー」を選べばいつでも株価分析に戻ることができます。")
+    
+    with st.expander("📝 Q. 英語が話せなくても米国株は買えますか？", expanded=True):
+        st.write("**A. はい、完全に日本語だけで購入できます。**\nSBI証券や楽天証券などの国内ネット証券を使えば、アプリ画面も企業情報もすべて日本語です。日本の株を買うのと全く同じ感覚で取引できます。")
+        
+    with st.expander("💰 Q. 最低いくらくらいの軍資金が必要ですか？"):
+        st.write("**A. 数千円〜数万円の少額からスタートできます。**\n日本株は最低100株（数十万円単位）が必要ですが、米国株は1株単位で購入できます。コカ・コーラやアップルなどの大企業株も1株数千円〜3万円程度で購入可能です。")
+
+    with st.expander("💴 Q. ドルに両替してから買う必要がありますか？"):
+        st.write("**A. いいえ、日本円のまま（円貨決済）で購入できます。**\n注文時に「円貨決済」を選べば、証券会社が自動でドル換算して買い付けてくれます。事前にドルを用意する手間は一切ありません。")
+
+    with st.expander("🔐 Q. 口座開設や維持にお金はかかりますか？"):
+        st.write("**A. 口座開設費、維持費、管理費などは「すべて無料」です。**\n実際に株を売買するときに数十円程度の手数料がかかるだけなので、まずは口座を作ってアプリの使い心地や株価情報をチェックしてみるのがおすすめです。")
+
 
