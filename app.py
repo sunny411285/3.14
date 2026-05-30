@@ -113,8 +113,7 @@ if page_choice == "📊 米国株チェッカー":
         keyword = f"{ticker} ニュース"
         g_url = "https://google.com?" + urllib.parse.urlencode({"q": keyword, "tbm": "nws"})
         y_url = "https://yahoo.co.jp?" + urllib.parse.urlencode({"p": keyword})
-        b1, b2 = st.columns(2)
-        b1.link_button("🌐 Googleニュースで見る", g_url, use_container_width=True)
+        b2 = st.columns(2)
         b2.link_button("🇯🇵 Yahoo! JAPANで検索する", y_url, use_container_width=True)
 
     st.write("---")
@@ -150,22 +149,4 @@ elif page_choice == "💡 初心者向けナビ":
             st.subheader("🔴 楽天証券 (使いやすさNo.1)")
             st.markdown("- **手数料**: 業界最安水準\n- **強み**: アプリ**「iSPEED」**が抜群に見やすく初心者向け。楽天ポイント利用も可能\n- **おすすめ**: 楽天経済圏の方や操作性を重視する方")
             st.link_button("👉 楽天証券で口座開設する（無料）", "https://rakuten-sec.co.jp", use_container_width=True)
-
-# --- ❓ よくある質問（FAQ） ---
-elif page_choice == "❓ よくある質問（FAQ）":
-    st.title("❓ よくある質問（FAQ）")
-    st.info("💡 左メニューから「📊 米国株チェッカー」を選べばいつでも株価分析に戻ることができます。")
-    
-    with st.expander("📝 Q. 英語が話せなくても米国株は買えますか？", expanded=True):
-        st.write("**A. はい、完全に日本語だけで購入できます。**\nSBI証券や楽天証券などの国内ネット証券を使えば、アプリ画面も企業情報もすべて日本語です。日本の株を買うのと全く同じ感覚で取引できます。")
-        
-    with st.expander("💰 Q. 最低いくらくらいの軍資金が必要ですか？"):
-        st.write("**A. 数千円〜数万円の少額からスタートできます。**\n日本株は最低100株（数十万円単位）が必要ですが、米国株は1株単位で購入できます。コカ・コーラやアップルなどの大企業株も1株数千円〜3万円程度で購入可能です。")
-
-    with st.expander("💴 Q. ドルに両替してから買う必要がありますか？"):
-        st.write("**A. いいえ、日本円のまま（円貨決済）で購入できます。**\n注文時に「円貨決済」を選べば、証券会社が自動でドル換算して買い付けてくれます。事前にドルを用意する手間は一切ありません。")
-
-    with st.expander("🔐 Q. 口座開設や維持にお金はかかりますか？"):
-        st.write("**A. 口座開設費、維持費、管理費などは「すべて無料」です。**\n実際に株を売買するときに数十円程度の手数料がかかるだけなので、まずは口座を作ってアプリの使い心地や株価情報をチェックしてみるのがおすすめです。")
-
 
